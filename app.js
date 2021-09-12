@@ -8,14 +8,18 @@ const web3 = new Web3(provider)
 let lastBlock
 
 async function checkLatestBlock() {
-    let block = await web3.eth.getBlock('latest')
-    if (lastBlock === block.number) {
-        console.log("Old block, skipping", block.number)
-        return
+    if (!lastBlock) {
+        lastBlock = await web3.eth.getBlock('latest')
+        lastBlock = lastBlock.number
     }
-    lastBlock = block.number
+    let block
+    lastBlock += 1
+    while (block === undefined || block === null){
+        console.log("Waiting for next block:", lastBlock)
+        block = await web3.eth.getBlock(lastBlock)
+        await delay(parseInt(process.env.CHECK_INTERVAL) * 1000)
+    }
     console.log(`Reading ${block.number}`)
-
     block.transactions.forEach(async (txn) => {
 
         let tx = await web3.eth.getTransaction(txn)
@@ -98,9 +102,21 @@ function sendDiscordAlert(data){
 
 }
 
-checkLatestBlock()
-setInterval(()=>{
-    checkLatestBlock()
-}, parseInt(process.env.CHECK_INTERVAL) * 1000)
+
+function delay(ms) {
+    return new Promise(resolve => {
+        setTimeout(() => { resolve('') }, ms);
+    })
+}
+
+async function start() {
+    while (true){
+        await checkLatestBlock()
+    }
+}
+
+start()
+
+
 
 

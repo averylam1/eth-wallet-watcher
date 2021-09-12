@@ -60,11 +60,14 @@ function sendDiscordAlert(data){
         "content": null,
         "embeds": [
             {
-                "title": `Transaction Found - ${data.tx.from}`,
+                "title": `Transaction Found - ${data.tx.hash}`,
                 "url": `https://etherscan.io/tx/${data.tx.hash}`,
                 "color": 65442,
                 "fields": [
                     {
+                        "name": "Wallet",
+                        "value": data.tx.from
+                    },{
                         "name": "Function called",
                         "value": data.inputData.name
                     },{
